@@ -1,7 +1,5 @@
 # Question Generation (QG): An Experimental Study for Vietnamese Text
 
-Authors: Pham Quoc-Hung, Huu-Loi Le, Dang Nhat Minh, Khang T. Tran, Huy-The Vu, Minh-Tien Nguyen, Xuan-Hieu Phan
-
 ## Directory
 Please note that you should prepare a folder to store the data as shown below:
 
