@@ -52,4 +52,13 @@ python cli.py _evaluate --model_name 'ViT5' --dataset 'ViNewsQA' --lr 1e-5 --bat
     
 ## Citation
 
-    Comming soon!
+```
+@inproceedings{inproceedings,
+author = {Quoc-Hung, Pham and Le, Huu-Loi and Minh, Dang and Tran, Khang and Vu, Huy-The and Nguyen, Minh-Tien and Phan, Xuan-Hieu},
+year = {2023},
+month = {12},
+pages = {324-329},
+title = {Question Generation: An Experimental Study for Vietnamese Text},
+doi = {10.1109/RIVF60135.2023.10471875}
+}
+```
