@@ -51,9 +51,9 @@ def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_na
     #train = load_json(f'datasets/{dataset}/train.json', dataset)
     #val = load_json(f'datasets/{dataset}/dev.json', dataset)
     #test = load_json(f'datasets/{dataset}/test.json', dataset)
-    train = load_dataset(dataset)['train']
-    val = load_dataset(dataset)['validation']
-    test = load_dataset(dataset)['test']
+    train = load_dataset(dataset,use_auth_token=True)['train']
+    val = load_dataset(dataset,use_auth_token=True)['validation']
+    test = load_dataset(dataset,use_auth_token=True)['test']
     dataset = HandleDataset(train, val, test)
     dataset.load_data_and_fields()
     src_vocab, trg_vocab = dataset.get_vocabs()
