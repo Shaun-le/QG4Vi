@@ -35,8 +35,8 @@ class HandleDataset(object):
         train_examples = []
         for sample in train:
             context = sample["paragraph"]
-            answer = sample["answers"]
-            question = sample["questions"]
+            answer = sample["answer"]
+            question = sample["question"]
 
             src = f"{answer} <sep> {context}"
             trg = question
