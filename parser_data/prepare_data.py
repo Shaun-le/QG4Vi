@@ -38,7 +38,7 @@ class HandleDataset(object):
             answer = sample["answers"]
             question = sample["questions"]
 
-            src = f"{context} {answer}"
+            src = f"{answer} <sep> {context}"
             trg = question
 
             train_examples.append((src, trg))
@@ -46,11 +46,11 @@ class HandleDataset(object):
         # Create test examples
         test_examples = []
         for sample in test:
-            context = sample["contexts"]
-            answer = sample["answers"]
-            question = sample["questions"]
+            context = sample["paragraph"]
+            answer = sample["answer"]
+            question = sample["question"]
 
-            src = f"{context} {answer}"
+            src = f"{answer} <sep> {context}"
             trg = question
 
             test_examples.append((src, trg))
@@ -58,11 +58,11 @@ class HandleDataset(object):
         # Create validation examples
         val_examples = []
         for sample in val:
-            context = sample["contexts"]
-            answer = sample["answers"]
-            question = sample["questions"]
+            context = sample["paragraph"]
+            answer = sample["answer"]
+            question = sample["question"]
 
-            src = f"{context} {answer}"
+            src = f"{answer} <sep> {context}"
             trg = question
 
             val_examples.append((src, trg))

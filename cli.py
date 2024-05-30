@@ -2,7 +2,7 @@ import click
 import math
 import numpy as np
 import pandas as pd
-from nltk import word_tokenize
+#from nltk import word_tokenize
 from torchtext.data import BucketIterator
 from main import set_SEED
 from parser_data.load_data import load_json
@@ -18,9 +18,11 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, Seq2SeqTrainingAr
     Seq2SeqTrainer
 import torch
 import torch.nn as nn
+from datasets import load_dataset
 import torch.optim as optim
 from IPython.display import display
 import nltk
+from underthesea import word_tokenize
 nltk.download('wordnet')
 nltk.download('punkt')
 
@@ -32,8 +34,9 @@ def cli():
 @cli.command('evaluateTNM')
 @click.option('--model_name', type=click.Choice(('rnn','cnn','transformer')), default=None,
               help="Choice model")
-@click.option('--dataset', type=click.Choice(('ViNewsQA','ViQuAD','ViCoQA','ViMMRC1.0','ViMMRC2.0')),
-                default=None, help="the dataset used for training model")
+#@click.option('--dataset', type=click.Choice(('ViNewsQA','ViQuAD','ViCoQA','ViMMRC1.0','ViMMRC2.0')),
+#               default=None, help="the dataset used for training model")
+@click.option('--dataset', default=None, help="the dataset used for training model")
 @click.option('--attention', default='luong', type=click.Choice(('bahdanau','luong')), help='attention layer for rnn model')
 @click.option('--batch_size', default=8, type=int, help='batch size')
 @click.option('--epochs_num', default=20, type=int, help='number of epochs')
@@ -45,9 +48,12 @@ def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_na
     print("data: ", dataset)
     print("model: ", model_name)
     print('--------------------------------')
-    train = load_json(f'datasets/{dataset}/train.json', dataset)
-    val = load_json(f'datasets/{dataset}/dev.json', dataset)
-    test = load_json(f'datasets/{dataset}/test.json', dataset)
+    #train = load_json(f'datasets/{dataset}/train.json', dataset)
+    #val = load_json(f'datasets/{dataset}/dev.json', dataset)
+    #test = load_json(f'datasets/{dataset}/test.json', dataset)
+    train = load_dataset(dataset)['train']
+    val = load_dataset(dataset)['validation']
+    test = load_dataset(dataset)['test']
     dataset = HandleDataset(train, val, test)
     dataset.load_data_and_fields()
     src_vocab, trg_vocab = dataset.get_vocabs()
@@ -57,8 +63,8 @@ def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_na
     print(f"Evaluation data: {len(valid_data.examples)}")
     print(f"Testing data: {len(test_data.examples)}")
     print('--------------------------------')
-    print(f'Question example: {train_data.examples[2].src}\n')
-    print(f'Answer example: {train_data.examples[2].trg}')
+    print(f'Question example: {train_data.examples[0].src}\n')
+    print(f'Answer example: {train_data.examples[0].trg}')
     print('--------------------------------')
     print(f"Unique tokens in questions vocabulary: {len(src_vocab)}")
     print(f"Unique tokens in answers vocabulary: {len(trg_vocab)}")
@@ -111,10 +117,10 @@ def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_na
     trainer = Trainer(optimizer, criterion, batch_size, DEVICE)
     train_loss, val_loss = trainer.train(model, train_data, valid_data, 'datasets', num_of_epochs=epochs_num)
 
-    val_ref = [list(filter(None, np.delete([sample["contexts"], sample["answers"], sample["questions"]], [0, 1]))) for
+    val_ref = [list(filter(None, np.delete([sample["paragraph"], sample["answer"], sample["question"]], [0, 1]))) for
                sample in val]
 
-    test_ref = [list(filter(None, np.delete([sample["contexts"], sample["answers"], sample["questions"]], [0, 1]))) for
+    test_ref = [list(filter(None, np.delete([sample["paragraph"], sample["answer"], sample["question"]], [0, 1]))) for
                 sample in test]
 
     val_trg = []
@@ -129,9 +135,9 @@ def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_na
             t.append(tmp)
 
     val_src = [i.src for i in valid_data.examples]
-    new_valid = [[val_src[i], [word_tokenize(val[i]["questions"])]] for i in range(len(val))]
+    new_valid = [[val_src[i], [word_tokenize(val[i]["question"])]] for i in range(len(val))]
     test_src = [i.src for i in test_data.examples]
-    new_test = [[test_src[i], [word_tokenize(test[i]["questions"])]] for i in range(len(test))]
+    new_test = [[test_src[i], [word_tokenize(test[i]["question"])]] for i in range(len(test))]
 
     valid_iterator, test_iterator = BucketIterator.splits(
         (valid_data, test_data),
