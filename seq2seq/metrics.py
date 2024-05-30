@@ -3,8 +3,10 @@ import numpy as np
 from datasets import load_metric
 from nltk.translate.bleu_score import SmoothingFunction
 from rouge_score import rouge_scorer
+from nltk.translate.bleu_score import sentence_bleu
 import tqdm
-
+import spacy
+nlpvi = spacy.load('vi_core_news_lg')
 smoothie = SmoothingFunction().method4
 
 class ComputeScorer(object):
@@ -26,14 +28,28 @@ class ComputeScorer(object):
 
     def example_score(self, reference, hypothesis):
         """Calculate blue score for one example"""
-        bleu_1 = nltk.translate.bleu_score.sentence_bleu(reference, hypothesis, weights=(1, 0, 0, 0),
-                                                         smoothing_function=SmoothingFunction().method4)
-        bleu_2 = nltk.translate.bleu_score.sentence_bleu(reference, hypothesis, weights=(0.5, 0.5, 0, 0),
-                                                         smoothing_function=SmoothingFunction().method4)
-        bleu_3 = nltk.translate.bleu_score.sentence_bleu(reference, hypothesis, weights=(0.33, 0.33, 0.33, 0),
-                                                         smoothing_function=SmoothingFunction().method4)
-        bleu_4 = nltk.translate.bleu_score.sentence_bleu(reference, hypothesis, weights=(0.25, 0.25, 0.25, 0.25),
-                                                         smoothing_function=SmoothingFunction().method4)
+        bleu_scores = {1: [], 2: [], 3: [], 4: []}
+
+        for sent1, sent2 in zip(hypothesis, reference):
+            sent1_doc = nlpvi(sent1)
+            sent2_doc = nlpvi(sent2)
+            ws = [
+                (1, 0, 0, 0),
+                (0.5, 0.5, 0, 0),
+                (0.33, 0.33, 0.33, 0),
+                (0.25, 0.25, 0.25, 0.25)
+            ]
+            for n in range(1, 5):
+                weights = ws[n - 1]
+                sent1_tokens = [token.text for token in sent1_doc]
+                sent2_tokens = [token.text for token in sent2_doc]
+                bleu_score = sentence_bleu([sent1_tokens], sent2_tokens, weights=weights)
+                bleu_scores[n].append(bleu_score)
+
+        bleu_1 = (sum(bleu_scores[1]) / len(bleu_scores[1])) * 100
+        bleu_2 = (sum(bleu_scores[2]) / len(bleu_scores[2])) * 100
+        bleu_3 = (sum(bleu_scores[3]) / len(bleu_scores[3])) * 100
+        bleu_4 = (sum(bleu_scores[4]) / len(bleu_scores[4])) * 100
         return bleu_1, bleu_2, bleu_3, bleu_4
 
     def example_score_rouge(self, reference, hypothesis):
