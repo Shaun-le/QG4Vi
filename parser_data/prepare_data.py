@@ -34,7 +34,7 @@ class HandleDataset(object):
         # Create train examples
         train_examples = []
         for sample in train:
-            context = sample["contexts"]
+            context = sample["paragraph"]
             answer = sample["answers"]
             question = sample["questions"]
 
