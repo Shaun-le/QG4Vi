@@ -6,7 +6,7 @@ import pandas as pd
 from torchtext.data import BucketIterator
 from main import set_SEED
 from parser_data.load_data import load_json
-from parser_data.prepare_data import HandleDataset
+from parser_data.prepare_data import HandleDataset, HandleDatasetFill, HandleDatasetMCQ
 from pre_trained.evaluation import compute_score
 from pre_trained.preprocess import preprocess_function, preprocess_function_without_answer
 from seq2seq.metrics import ComputeScorer
@@ -41,7 +41,8 @@ def cli():
 @click.option('--batch_size', default=8, type=int, help='batch size')
 @click.option('--epochs_num', default=20, type=int, help='number of epochs')
 @click.option('--cell_name', type=click.Choice(('lstm','gru')), default='gru')
-def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_name):
+@click.option('--task', type=click.Choice(('qg-aware','qg-agnostic','qag','mcq','fill')), default='qg-aware')
+def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_name, task):
     """
     Training and evaluate model for QG task in Vietnamese Text
     """
@@ -54,7 +55,20 @@ def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_na
     train = load_dataset(dataset,use_auth_token=True)['train']
     val = load_dataset(dataset,use_auth_token=True)['validation']
     test = load_dataset(dataset,use_auth_token=True)['test']
-    dataset = HandleDataset(train, val, test)
+    def remove_nan_samples(dataset):
+        return dataset.filter(lambda x: x['distract'] != '' and x['distract'] != 'nan')
+    if task == 'qg-aware':
+        dataset = HandleDataset(train, val, test)
+    elif task == 'mcq':
+        train = remove_nan_samples(train)
+        val = remove_nan_samples(val)
+        test = remove_nan_samples(test)
+        dataset = HandleDatasetMCQ(train, val, test)
+    elif task == 'fill':
+        train = remove_nan_samples(train)
+        val = remove_nan_samples(val)
+        test = remove_nan_samples(test)
+        dataset = HandleDatasetMCQ(train, val, test)
     dataset.load_data_and_fields()
     src_vocab, trg_vocab = dataset.get_vocabs()
     train_data, valid_data, test_data = dataset.get_data()
