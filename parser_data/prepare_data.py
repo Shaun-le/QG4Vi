@@ -38,7 +38,7 @@ class HandleDataset(object):
             answer = sample["answer"]
             question = sample["question"]
 
-            src = f"{answer} <sep> {context}"
+            src = f"{answer} | {context}"
             trg = question
 
             train_examples.append((src, trg))
@@ -50,7 +50,7 @@ class HandleDataset(object):
             answer = sample["answer"]
             question = sample["question"]
 
-            src = f"{answer} <sep> {context}"
+            src = f"{answer} | {context}"
             trg = question
 
             test_examples.append((src, trg))
@@ -62,7 +62,7 @@ class HandleDataset(object):
             answer = sample["answer"]
             question = sample["question"]
 
-            src = f"{answer} <sep> {context}"
+            src = f"{answer} | {context}"
             trg = question
 
             val_examples.append((src, trg))

@@ -28,6 +28,8 @@ class ComputeScorer(object):
 
     def example_score(self, reference, hypothesis):
         """Calculate blue score for one example"""
+        print(hypothesis)
+        print(type(hypothesis))
         bleu_scores = {1: [], 2: [], 3: [], 4: []}
 
         for sent1, sent2 in zip(hypothesis, reference):
@@ -51,6 +53,18 @@ class ComputeScorer(object):
         bleu_3 = (sum(bleu_scores[3]) / len(bleu_scores[3])) * 100
         bleu_4 = (sum(bleu_scores[4]) / len(bleu_scores[4])) * 100
         return bleu_1, bleu_2, bleu_3, bleu_4
+
+    '''def example_score(self, reference, hypothesis):
+        """Calculate blue score for one example"""
+        bleu_1 = nltk.translate.bleu_score.sentence_bleu(reference, hypothesis, weights=(1, 0, 0, 0),
+                                                         smoothing_function=SmoothingFunction().method4)
+        bleu_2 = nltk.translate.bleu_score.sentence_bleu(reference, hypothesis, weights=(0.5, 0.5, 0, 0),
+                                                         smoothing_function=SmoothingFunction().method4)
+        bleu_3 = nltk.translate.bleu_score.sentence_bleu(reference, hypothesis, weights=(0.33, 0.33, 0.33, 0),
+                                                         smoothing_function=SmoothingFunction().method4)
+        bleu_4 = nltk.translate.bleu_score.sentence_bleu(reference, hypothesis, weights=(0.25, 0.25, 0.25, 0.25),
+                                                         smoothing_function=SmoothingFunction().method4)
+        return bleu_1, bleu_2, bleu_3, bleu_4'''
 
     def example_score_rouge(self, reference, hypothesis):
         scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=False)
