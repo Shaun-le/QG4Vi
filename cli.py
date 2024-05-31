@@ -40,9 +40,10 @@ def cli():
 @click.option('--attention', default='luong', type=click.Choice(('bahdanau','luong')), help='attention layer for rnn model')
 @click.option('--batch_size', default=8, type=int, help='batch size')
 @click.option('--epochs_num', default=20, type=int, help='number of epochs')
+@click.option('--lr', default=0.001, type=float, help='learning rate')
 @click.option('--cell_name', type=click.Choice(('lstm','gru')), default='gru')
 @click.option('--task', type=click.Choice(('qg-aware','qg-agnostic','qag','mcq','fill')), default='qg-aware')
-def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_name, task):
+def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_name, task,lr):
     """
     Training and evaluate model for QG task in Vietnamese Text
     """
@@ -124,9 +125,9 @@ def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_na
         for p in model.parameters():
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
-        optimizer = NoamOpt(torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
+        optimizer = NoamOpt(torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.98), eps=1e-9))
     else:
-        optimizer = optim.Adam(model.parameters(), lr=0.001)
+        optimizer = optim.Adam(model.parameters(), lr=lr)
 
 
     criterion = nn.CrossEntropyLoss(ignore_index=trg_vocab.stoi[PAD_TOKEN])
