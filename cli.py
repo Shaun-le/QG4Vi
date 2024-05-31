@@ -6,7 +6,7 @@ import pandas as pd
 from torchtext.data import BucketIterator
 from main import set_SEED
 from parser_data.load_data import load_json
-from parser_data.prepare_data import HandleDataset, HandleDatasetFill, HandleDatasetMCQ
+from parser_data.prepare_data import HandleDataset, HandleDatasetFill, HandleDatasetMCQ, HandleDatasetAG
 from pre_trained.evaluation import compute_score
 from pre_trained.preprocess import preprocess_function, preprocess_function_without_answer
 from seq2seq.metrics import ComputeScorer
@@ -59,6 +59,8 @@ def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_na
         return dataset.filter(lambda x: x['distract'] != '' and x['distract'] != 'nan')
     if task == 'qg-aware':
         dataset = HandleDataset(train, val, test)
+    elif task == 'qg-agnostic':
+        dataset = HandleDatasetAG(train, val, test)
     elif task == 'mcq':
         train = remove_nan_samples(train)
         val = remove_nan_samples(val)
@@ -68,7 +70,7 @@ def _evaluateTNM(model_name, dataset, attention, batch_size, epochs_num, cell_na
         train = remove_nan_samples(train)
         val = remove_nan_samples(val)
         test = remove_nan_samples(test)
-        dataset = HandleDatasetMCQ(train, val, test)
+        dataset = HandleDatasetFill(train, val, test)
     dataset.load_data_and_fields()
     src_vocab, trg_vocab = dataset.get_vocabs()
     train_data, valid_data, test_data = dataset.get_data()
